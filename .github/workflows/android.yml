@@ -60,6 +60,10 @@ jobs:
       - name: Verify Branches & Structure
         run: |
           echo "验证主仓库分支..."
+          cd
+          echo "cd"
+          ls -al
+          echo "cd mainDIR"
           cd ${{ env.MAIN_REPO_DIR }}
           ls -al
           CURRENT_MAIN_BRANCH=$(git branch --show-current)
@@ -69,8 +73,12 @@ jobs:
           fi
           
           echo "验证依赖仓库分支..."
+          cd
+          echo "cd"
+          ls -al
           cd ${{ env.SUBMODULE_DIR }}
           ls -al
+          echo "cd subDIR"
           CURRENT_DEP_BRANCH=$(git branch --show-current)
           if [ "$CURRENT_DEP_BRANCH" != "$DEPENDENCY_REPO_BRANCH" ]; then
             echo "错误：依赖仓库分支不匹配！预期: $DEPENDENCY_REPO_BRANCH，实际: $CURRENT_DEP_BRANCH"
