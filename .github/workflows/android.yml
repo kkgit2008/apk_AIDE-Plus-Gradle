@@ -19,9 +19,9 @@ env:
   DEPENDENCY_REPO_BRANCH: '2.3main'
   # 外部仓库分支
 
-  MAIN_REPO_DIR: 'main11'
+  MAIN_REPO_DIR: './main11/'
   # 将当前仓库检出到临时仓库的目录
-  SUBMODULE_DIR: 'main11/Submodule/AIDE/AIDE-PLUS'
+  SUBMODULE_DIR: './main11/Submodule/AIDE/AIDE-PLUS/'
   # 将外部仓库检出到临时仓库的目录
 
 jobs:
@@ -31,7 +31,8 @@ jobs:
     strategy:
       # 矩阵功能，为每个包构建
       matrix:
-        flavor: [ default, termux ]
+        # flavor: [ default, termux ]
+        flavor: [ default ]
 
     steps:
       # 清理已有的MAIN_REPO_DIR，防止冲突
@@ -48,7 +49,7 @@ jobs:
           submodules: true
 
       # 第二步：检出依赖仓库 (username/repo2@branch2)
-      - name: Checkout AIDE-GG Repository
+      - name: Checkout sub Repository
         uses: actions/checkout@v4
         with:
           repository: ${{ env.DEPENDENCY_NAME }}
@@ -57,8 +58,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       # 第三步：验证分支和目录结构
-      - name: Verify Branches & StructureStructure
-        working-directory: ${{ env.MAIN_REPO_DIR }}
+      - name: Verify Branches & Structure
         run: |
           echo "验证主仓库分支..."
           echo "current dir"
