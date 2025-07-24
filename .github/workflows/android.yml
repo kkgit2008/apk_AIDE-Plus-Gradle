@@ -47,14 +47,6 @@ jobs:
           path: ${{ env.MAIN_REPO_DIR }}
           submodules: true
 
-      # 检查依赖仓库是否存在
-      - name: Verify Dependency
-        run: |
-          if [ ! -d "${{ env.SUBMODULE_DIR }}/.git" ]; then
-            echo "依赖仓库不存在！"
-            exit 1
-          fi
-
       # 第二步：检出依赖仓库 (username/repo2@branch2)
       - name: Checkout AIDE-GG Repository
         uses: actions/checkout@v4
