@@ -61,8 +61,10 @@ jobs:
         working-directory: ${{ env.MAIN_REPO_DIR }}
         run: |
           echo "验证主仓库分支..."
-          echo "cd mainDIR"
+          echo "current dir"
+          ls -al
           cd ${{ env.MAIN_REPO_DIR }}
+          echo "cd mainDIR"
           ls -al
           CURRENT_MAIN_BRANCH=$(git branch --show-current)
           if [ "$CURRENT_MAIN_BRANCH" != "$MAIN_REPO_BRANCH" ]; then
@@ -71,9 +73,11 @@ jobs:
           fi
           
           echo "验证依赖仓库分支..."
-          echo "cd subDIR"
+          echo "current dir"
+          ls -al
           cd ..
           cd ${{ env.SUBMODULE_DIR }}
+          echo "cd subDIR"
           ls -al
           CURRENT_DEP_BRANCH=$(git branch --show-current)
           if [ "$CURRENT_DEP_BRANCH" != "$DEPENDENCY_REPO_BRANCH" ]; then
