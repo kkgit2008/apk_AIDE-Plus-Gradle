@@ -57,7 +57,8 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       # 第三步：验证分支和目录结构
-      - name: Verify Branches & Structure
+      - name: Verify Branches & StructureStructure
+        working-directory: ${{ env.MAIN_REPO_DIR }}
         run: |
           echo "验证主仓库分支..."
           echo "cd"
