@@ -1,13 +1,28 @@
-name: Build & Publish Release APK
+name: Build with AIDE-PLUS & Publish APK
 
 on:
   push:
     tags:
       - v*
-  pull_request:
-    # 分支名称
-    branches: [ "master" ]
+    branches:
+      - '**'
+#    branches: [ "dev" ]
+#  pull_request:    branches: [ "dev" ]
   workflow_dispatch: { }
+
+env:
+  MAIN_NAME: 'kkgi/apk_AIDE-Plus' 
+  DEPENDENCY_NAME: 'kkgi/apk_AIDE-Plus-Gradle'
+  
+  MAIN_REPO_BRANCH: 'master'
+  # 当前仓库分支
+  DEPENDENCY_REPO_BRANCH: '2.3'
+  # 外部仓库分支
+
+  MAIN_REPO_DIR: 'main11'
+  # 将当前仓库检出到临时仓库的目录
+  SUBMODULE_DIR: 'main11/Submodule/AIDE/AIDE-PLUS'
+  # 将外部仓库检出到临时仓库的目录
 
 jobs:
   build:
@@ -19,7 +34,60 @@ jobs:
         flavor: [ default, termux ]
 
     steps:
-    - uses: actions/checkout@v4
+    # 清理已有的MAIN_REPO_DIR，防止冲突
+    - name: Clean workspace
+      run: rm -rf ${{ env.MAIN_REPO_DIR }}
+
+    # 第一步：检出主仓库 (username/repo@branch)
+    - name: Checkout Main Repository
+      uses: actions/checkout@v4
+      with:
+        repository: ${{ env.MAIN_NAME }}
+        ref: ${{ env.MAIN_REPO_BRANCH }}
+        path: ${{ env.MAIN_REPO_DIR }}
+        submodules: true
+
+    # 检查依赖仓库是否存在
+    - name: Verify Dependency
+      run: |
+       if [ ! -d "${{ env.SUBMODULE_DIR }}/.git" ]; then
+         echo "依赖仓库不存在！"
+         exit 1
+       fi
+
+    # 第二步：检出依赖仓库 (username/repo2@branch2)
+    - name: Checkout AIDE-GG Repository
+      uses: actions/checkout@v4
+      with:
+        repository: ${{ env.DEPENDENCY_NAME }}
+        ref: ${{ env.DEPENDENCY_REPO_BRANCH }}
+        path: ${{ env.SUBMODULE_DIR }}
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+   # 第三步：验证分支和目录结构
+   - name: Verify Branches & Structure
+     run: |
+       echo "验证主仓库分支..."
+       cd ${{ env.MAIN_REPO_DIR }}
+       CURRENT_MAIN_BRANCH=$(git branch --show-current)
+       if [ "$CURRENT_MAIN_BRANCH" != "$MAIN_REPO_BRANCH" ]; then
+         echo "错误：主仓库分支不匹配！预期: $MAIN_REPO_BRANCH，实际: $CURRENT_MAIN_BRANCH"
+         exit 1
+       fi
+       
+       echo "验证依赖仓库分支..."
+       cd ${{ env.SUBMODULE_DIR }}
+       CURRENT_DEP_BRANCH=$(git branch --show-current)
+       if [ "$CURRENT_DEP_BRANCH" != "$DEPENDENCY_REPO_BRANCH" ]; then
+         echo "错误：依赖仓库分支不匹配！预期: $DEPENDENCY_REPO_BRANCH，实际: $CURRENT_DEP_BRANCH"
+         exit 1
+       fi
+       
+       echo "目录结构验证通过"
+       ls -la ${{ env.MAIN_REPO_DIR }}
+       ls -la ${{ env.SUBMODULE_DIR }}
+
+    # 第四步：设置JDK环境
     - name: set up JDK 21
       uses: actions/setup-java@v4
       with:
@@ -27,33 +95,57 @@ jobs:
         distribution: 'temurin'
         cache: gradle
 
+    # 第五步：准备构建环境
     - name: Grant execute permission for gradlew
+      working-directory: ${{ env.MAIN_REPO_DIR }}
       run: chmod +x gradlew
 
+    # 第六步：构建APK
     - name: Build APK for ${{ matrix.flavor }}
+      working-directory: ${{ env.MAIN_REPO_DIR }}
       run: ./gradlew app_flavor:${{ matrix.flavor }}:assembleRelease
 
-    - name: Get TAG_VERSION_NAME from build.gradle.kts
+    # 第七步：获取版本信息
+    - name: Get TAG_VERSION_NAME
+      working-directory: ${{ env.MAIN_REPO_DIR }}
       id: get_version_info
       run: |
         TAG_VERSION_NAME=$(grep "val TAG_VERSION_NAME =" build.gradle.kts | awk '{print $4}' | tr -d '"')
         echo "TAG_VERSION_NAME=${TAG_VERSION_NAME}" >> $GITHUB_ENV
+        echo "当前版本: ${TAG_VERSION_NAME}"
 
-      # 重命名
+    # 第八步：复制APK文件
     - name: Rename APK for ${{ matrix.flavor }}
-      run: mv build/app_flavor-${{ matrix.flavor }}/outputs/apk/${{ matrix.flavor }}/release/app-${{ matrix.flavor }}-release.apk build/app/outputs/apk/${{ matrix.flavor }}/release/AIDE-${{ matrix.flavor }}.apk
+      working-directory: ${{ env.MAIN_REPO_DIR }}
+      run: |
+        mkdir -p build/outputs/
+        for flavor in ${{ join(matrix.flavor, ' ') }}; do
+          original_path="build/app_flavor-$flavor/outputs/apk/$flavor/release/app-$flavor-release.apk"
+          output_path="build/outputs/AIDE-$flavor-v${TAG_VERSION_NAME}.apk"
+          mv "$original_path" "$output_path"
+        done
+#    - name: Rename APK for ${{ matrix.flavor }}
+#      run: |
+#        original_path="build/app_flavor-${{ matrix.flavor }}/outputs/apk/${{ matrix.flavor }}/release/app-${{ matrix.flavor }}-release.apk"
+#        output_path="build/app/outputs/apk/${{ matrix.flavor }}/release/AIDE-${{ matrix.flavor }}.apk"
+#        mv "$original_path" "$output_path"
 
+    # 第九步：上传APK
     - name: Upload  APK
       uses: actions/upload-artifact@v4
       with:
         name: AIDE-${{ matrix.flavor }}.apk
-        path: build/app/outputs/apk/${{ matrix.flavor }}/release/AIDE-${{ matrix.flavor }}.apk
-    # 发布到 Release
-    - name: Upload APK for ${{ matrix.flavor }} to GitHub Release
+        path: ${{ env.MAIN_REPO_DIR }}/build/outputs/*.apk
+        # path: build/app/outputs/apk/${{ matrix.flavor }}/release/AIDE-${{ matrix.flavor }}.apk
+
+    # 第十步：发布到GitHub Release
+    - name: Publish Release
+      if: startsWith(github.ref, 'refs/tags/')
+      # 仅在有tag时发布
       uses: softprops/action-gh-release@v2
       with:
-        body_path: changlog/${{ env.TAG_VERSION_NAME }}/README.md
-        tag_name: ${{ env.TAG_VERSION_NAME }}
-        repository: neu233/AIDE-Plus-AS
-        files: build/app/outputs/apk/${{ matrix.flavor }}/release/AIDE-${{ matrix.flavor }}.apk
-        token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
+        body_path: ${{ env.MAIN_REPO_DIR }}/changelog/${{ env.TAG_VERSION_NAME }}/README.md
+        # tag_name: ${{ env.TAG_VERSION_NAME }}
+        tag_name: ${{ github.ref_name }}
+        files: ${{ env.MAIN_REPO_DIR }}/build/outputs/*.apk
+        token: ${{ secrets.GITHUB_TOKEN }}
