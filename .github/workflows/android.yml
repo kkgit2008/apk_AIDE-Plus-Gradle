@@ -11,8 +11,8 @@ on:
   workflow_dispatch: { }
 
 env:
-  MAIN_NAME: 'kkgit2008/apk_AIDE-Plus' 
-  DEPENDENCY_NAME: 'kkgit2008/apk_AIDE-Plus-Gradle'
+  MAIN_NAME: 'kkgit2008/apk_AIDE-Plus-Gradle' 
+  DEPENDENCY_NAME: 'kkgit2008/apk_AIDE-Plus'
   
   MAIN_REPO_BRANCH: 'master'
   # 当前仓库分支
