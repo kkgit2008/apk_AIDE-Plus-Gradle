@@ -66,25 +66,25 @@ jobs:
    # 第三步：验证分支和目录结构
    - name: Verify Branches & Structure
      run: |
-       echo "验证主仓库分支..."
-       cd ${{ env.MAIN_REPO_DIR }}
-       CURRENT_MAIN_BRANCH=$(git branch --show-current)
-       if [ "$CURRENT_MAIN_BRANCH" != "$MAIN_REPO_BRANCH" ]; then
-         echo "错误：主仓库分支不匹配！预期: $MAIN_REPO_BRANCH，实际: $CURRENT_MAIN_BRANCH"
-         exit 1
-       fi
-       
-       echo "验证依赖仓库分支..."
-       cd ${{ env.SUBMODULE_DIR }}
-       CURRENT_DEP_BRANCH=$(git branch --show-current)
-       if [ "$CURRENT_DEP_BRANCH" != "$DEPENDENCY_REPO_BRANCH" ]; then
-         echo "错误：依赖仓库分支不匹配！预期: $DEPENDENCY_REPO_BRANCH，实际: $CURRENT_DEP_BRANCH"
-         exit 1
-       fi
-       
-       echo "目录结构验证通过"
-       ls -la ${{ env.MAIN_REPO_DIR }}
-       ls -la ${{ env.SUBMODULE_DIR }}
+           echo "验证主仓库分支..."
+           cd ${{ env.MAIN_REPO_DIR }}
+           CURRENT_MAIN_BRANCH=$(git branch --show-current)
+           if [ "$CURRENT_MAIN_BRANCH" != "$MAIN_REPO_BRANCH" ]; then
+             echo "错误：主仓库分支不匹配！预期: $MAIN_REPO_BRANCH，实际: $CURRENT_MAIN_BRANCH"
+             exit 1
+           fi
+           
+           echo "验证依赖仓库分支..."
+           cd ${{ env.SUBMODULE_DIR }}
+           CURRENT_DEP_BRANCH=$(git branch --show-current)
+           if [ "$CURRENT_DEP_BRANCH" != "$DEPENDENCY_REPO_BRANCH" ]; then
+             echo "错误：依赖仓库分支不匹配！预期: $DEPENDENCY_REPO_BRANCH，实际: $CURRENT_DEP_BRANCH"
+             exit 1
+           fi
+           
+           echo "目录结构验证通过"
+           ls -la ${{ env.MAIN_REPO_DIR }}
+           ls -la ${{ env.SUBMODULE_DIR }}
 
     # 第四步：设置JDK环境
     - name: set up JDK 21
