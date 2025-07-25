@@ -75,7 +75,7 @@ jobs:
           fi
           
           echo ">>验证依赖仓库分支..."
-          cd ..
+          # cd ..
           cd ${{ env.SUBMODULE_DIR }}
           CURRENT_DEP_BRANCH=$(git branch --show-current)
           if [ "$CURRENT_DEP_BRANCH" != "$DEPENDENCY_REPO_BRANCH" ]; then
