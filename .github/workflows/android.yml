@@ -115,15 +115,17 @@ jobs:
       # 第八步：复制APK文件
       - name: Copy ${{ matrix.flavor }} APK
         run: |
-          original_path="${{ env.MAIN_REPO_DIR }}/.build/app_flavor-${{ matrix.flavor }}/outputs/apk/release/${{ matrix.flavor }}-release-*.apk"
-          output_path="${{ env.MAIN_REPO_DIR }}/"
-          cp "$original_path" "$output_path"
+          src_file="${{ env.MAIN_REPO_DIR }}/.build/app_flavor-${{ matrix.flavor }}/outputs/apk/release/${{ matrix.flavor }}-release-unsigned-unzipaligned-unsigned.apk"
+          dest_file="${{ env.MAIN_REPO_DIR }}/${{ matrix.flavor }}-release-unzipaligned-unsigned.apk"
 
-      - name: show moved apk files
-        # working-directory: ${{ env.MAIN_REPO_DIR }}
-        run: |
-          echo "ls -a ${{ env.MAIN_REPO_DIR }}/:"
-          ls -a ${{ env.MAIN_REPO_DIR }}/
+          if [ -f "$src_file" ]; then
+            cp "$src_file" "$dest_file"
+            echo ">>APK已复制并重命名为: $dest_file"
+            ls -la "$dest_file"
+          else
+            echo ">>错误: 未找到APK文件: $src_file"
+            exit 1
+          fi
 
       # 第九步：上传APK
       - name: Upload  APK
@@ -131,7 +133,7 @@ jobs:
         with:
           name: AIDE-release-${{ matrix.flavor }}.apk
           path: |
-            ${{ env.MAIN_REPO_DIR }}/*.apk
+            ${{ env.MAIN_REPO_DIR }}/${{ matrix.flavor }}-release-unzipaligned-unsigned.apk
 
       # 第十步：发布到GitHub Release
       - name: Publish Release
@@ -142,5 +144,5 @@ jobs:
           body_path: ${{ env.MAIN_REPO_DIR }}/changelog/${{ env.TAG_VERSION_NAME }}/README.md
           # tag_name: ${{ env.TAG_VERSION_NAME }}
           tag_name: ${{ github.ref_name }}
-          files: ${{ env.MAIN_REPO_DIR }}/*.apk
+          files: ${{ env.MAIN_REPO_DIR }}/${{ matrix.flavor }}-release-unzipaligned-unsigned.apk
           token: ${{ secrets.GITHUB_TOKEN }}
