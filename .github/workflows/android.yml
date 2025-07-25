@@ -122,7 +122,7 @@ jobs:
           mkdir -p build/outputs/
           for flavor in ${{ join(matrix.flavor, ' ') }}; do
             original_path=".build/app_flavor-$flavor/outputs/apk/release/$flavor-release-unsigned-unzipaligned-unsigned.apk"
-            output_path="./$flavor-release-unzipaligned-unsigned.apk"
+            output_path=".build/$flavor-release-unzipaligned-unsigned.apk"
             mv "$original_path" "$output_path"
           done
 
@@ -137,7 +137,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: AIDE-release-${{ matrix.flavor }}.apk
-          path: *.apk
+          path: .build/*.apk
           # path: ${{ env.MAIN_REPO_DIR }}/.build/outputs/*.apk
           # path: build/app/outputs/apk/${{ matrix.flavor }}/release/AIDE-${{ matrix.flavor }}.apk
 
@@ -150,5 +150,5 @@ jobs:
           body_path: ${{ env.MAIN_REPO_DIR }}/changelog/${{ env.TAG_VERSION_NAME }}/README.md
           # tag_name: ${{ env.TAG_VERSION_NAME }}
           tag_name: ${{ github.ref_name }}
-          files: ${{ env.MAIN_REPO_DIR }}/*.apk
+          files: ${{ env.MAIN_REPO_DIR }}/.build/*.apk
           token: ${{ secrets.GITHUB_TOKEN }}
