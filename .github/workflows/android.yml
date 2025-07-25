@@ -113,9 +113,9 @@ jobs:
           echo ">>当前版本: ${TAG_VERSION_NAME}"
 
       # 第八步：复制APK文件
-      - name: Copy ${{ matrix.build_type }} APK
+      - name: Copy ${{ matrix.flavor }} APK
         run: |
-          original_path="${{ env.MAIN_REPO_DIR }}/.build/app_flavor-$flavor/outputs/apk/release/$flavor-release-*.apk"
+          original_path="${{ env.MAIN_REPO_DIR }}/.build/app_flavor-${{ matrix.flavor }}/outputs/apk/release/${{ matrix.flavor }}-release-*.apk"
           output_path="${{ env.MAIN_REPO_DIR }}/"
           cp "$original_path" "$output_path"
 
