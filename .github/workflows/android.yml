@@ -35,6 +35,11 @@ jobs:
         flavor: [ default ]
 
     steps:
+      - name: Cancel previous runs
+        uses: styfle/cancel-workflow-action@0.12.1
+        with:
+          access_token: ${{ github.token }}
+
       # 清理已有的MAIN_REPO_DIR，防止冲突
       - name: Clean workspace
         run: |
