@@ -19,10 +19,10 @@ env:
   DEPENDENCY_REPO_BRANCH: '2.3main'
   # 外部仓库分支
 
-  MAIN_REPO_DIR: './main11/'
+  MAIN_REPO_DIR: './main11'
   # 将当前仓库检出到临时仓库的目录
-  SUBMODULE_DIR: './main11/Submodule/AIDE/AIDE-PLUS/'
-  # 将外部仓库检出到临时仓库的目录
+  SUBMODULE_DIR: './main11/Submodule/AIDE/AIDE-PLUS'
+  # 将外部仓库检出到临时仓库的目录>
 
 jobs:
   build:
@@ -146,9 +146,7 @@ jobs:
         with:
           name: AIDE-release-${{ matrix.flavor }}.apk
           path: |
-            # .build/*.apk
             ${{ env.MAIN_REPO_DIR }}/.build/*.apk
-            # .build/app/outputs/apk/${{ matrix.flavor }}/release/AIDE-${{ matrix.flavor }}.apk
 
       # 第十步：发布到GitHub Release
       - name: Publish Release
