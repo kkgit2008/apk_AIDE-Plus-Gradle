@@ -31,13 +31,13 @@ jobs:
     strategy:
       # 矩阵功能，为每个包构建
       matrix:
-        flavor: [ default ]
-        # flavor: [ default, termux ]
+        flavor: [ default, termux ]
 
     steps:
       # 清理已有的MAIN_REPO_DIR，防止冲突
       - name: Clean workspace
-        run: rm -rf ${{ env.MAIN_REPO_DIR }}
+        run: |
+          rm -rf ${{ env.MAIN_REPO_DIR }}
 
       # 第一步：检出主仓库 (username/repo@branch)
       - name: Checkout Main Repository
@@ -122,16 +122,22 @@ jobs:
           mkdir -p build/outputs/
           for flavor in ${{ join(matrix.flavor, ' ') }}; do
             original_path=".build/app_flavor-$flavor/outputs/apk/release/$flavor-release-unsigned-unzipaligned-unsigned.apk"
-            output_path=".build/outputs/$flavor-release-unzipaligned-unsigned.apk"
+            output_path="./$flavor-release-unzipaligned-unsigned.apk"
             mv "$original_path" "$output_path"
           done
+
+      - name: show moved apk files
+        working-directory: ${{ env.MAIN_REPO_DIR }}
+        run: |
+          ls -al *.apk
+          # sha256sum "$apk" > "${apk}.sha256"
 
       # 第九步：上传APK
       - name: Upload  APK
         uses: actions/upload-artifact@v4
         with:
-          name: AIDE-${{ matrix.flavor }}.apk
-          path: .build/outputs/*.apk
+          name: AIDE-release-${{ matrix.flavor }}.apk
+          path: *.apk
           # path: ${{ env.MAIN_REPO_DIR }}/.build/outputs/*.apk
           # path: build/app/outputs/apk/${{ matrix.flavor }}/release/AIDE-${{ matrix.flavor }}.apk
 
@@ -144,5 +150,5 @@ jobs:
           body_path: ${{ env.MAIN_REPO_DIR }}/changelog/${{ env.TAG_VERSION_NAME }}/README.md
           # tag_name: ${{ env.TAG_VERSION_NAME }}
           tag_name: ${{ github.ref_name }}
-          files: ${{ env.MAIN_REPO_DIR }}/.build/outputs/*.apk
+          files: ${{ env.MAIN_REPO_DIR }}/*.apk
           token: ${{ secrets.GITHUB_TOKEN }}
