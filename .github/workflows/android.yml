@@ -88,8 +88,8 @@ jobs:
           fi
           
           echo ">>目录结构验证通过"
-          ls -a ${{ env.MAIN_REPO_DIR }}
-          ls -a ${{ env.SUBMODULE_DIR }}
+          # ls -a ${{ env.MAIN_REPO_DIR }}
+          # ls -a ${{ env.SUBMODULE_DIR }}
 
       # 第四步：设置JDK环境
       - name: set up JDK 21
