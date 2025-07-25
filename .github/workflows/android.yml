@@ -13,7 +13,7 @@ on:
 env:
   MAIN_NAME: 'kkgit2008/apk_AIDE-Plus-Gradle' 
   DEPENDENCY_NAME: 'kkgit2008/apk_AIDE-Plus'
-  
+
   MAIN_REPO_BRANCH: 'master'
   # 当前仓库分支
   DEPENDENCY_REPO_BRANCH: '2.3main'
@@ -133,19 +133,22 @@ jobs:
           done
 
       - name: show moved apk files
-        working-directory: ${{ env.MAIN_REPO_DIR }}
+        # working-directory: ${{ env.MAIN_REPO_DIR }}
         run: |
-          ls -al .build/
-          # ls -al .build/*.apk
+          echo "ls -al ${{ env.MAIN_REPO_DIR }}/:"
+          ls -al ${{ env.MAIN_REPO_DIR }}/
+          echo "ls -al ${{ env.MAIN_REPO_DIR }}/.build/:"
+          ls -al ${{ env.MAIN_REPO_DIR }}/.build/
 
       # 第九步：上传APK
       - name: Upload  APK
         uses: actions/upload-artifact@v4
         with:
           name: AIDE-release-${{ matrix.flavor }}.apk
-          path: .build/*.apk
-          # path: ${{ env.MAIN_REPO_DIR }}/.build/outputs/*.apk
-          # path: build/app/outputs/apk/${{ matrix.flavor }}/release/AIDE-${{ matrix.flavor }}.apk
+          path: |
+            # .build/*.apk
+            ${{ env.MAIN_REPO_DIR }}/.build/*.apk
+            # .build/app/outputs/apk/${{ matrix.flavor }}/release/AIDE-${{ matrix.flavor }}.apk
 
       # 第十步：发布到GitHub Release
       - name: Publish Release
