@@ -31,7 +31,8 @@ jobs:
     strategy:
       # 矩阵功能，为每个包构建
       matrix:
-        flavor: [ default, termux ]
+        flavor: [ default ]
+        # flavor: [ default, termux ]
 
     steps:
       # 清理已有的MAIN_REPO_DIR，防止冲突
