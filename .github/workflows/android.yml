@@ -19,9 +19,9 @@ env:
   DEPENDENCY_REPO_BRANCH: '2.3main'
   # 外部仓库分支
 
-  MAIN_REPO_DIR: './main11'
+  MAIN_REPO_DIR: '.'
   # 将当前仓库检出到临时仓库的目录
-  SUBMODULE_DIR: './main11/Submodule/AIDE/AIDE-PLUS'
+  SUBMODULE_DIR: './Submodule/AIDE/AIDE-PLUS'
   # 将外部仓库检出到临时仓库的目录>
 
 jobs:
@@ -116,29 +116,22 @@ jobs:
       - name: show apk files
         working-directory: ${{ env.MAIN_REPO_DIR }}
         run: |
-          find . -name '*.apk' -print0 | while IFS= read -r -d '' apk; do
-            echo ">>ls -al apks:"
-            ls -al "$apk"
-            # sha256sum "$apk" > "${apk}.sha256"
-          done
+          echo ">>ls -a apks:"
+          ls -a *.apk
 
-      - name: Rename APK for ${{ matrix.flavor }}
-        working-directory: ${{ env.MAIN_REPO_DIR }}
+      - name: Copy ${{ matrix.build_type }} APK
         run: |
-          mkdir -p build/outputs/
-          for flavor in ${{ join(matrix.flavor, ' ') }}; do
-            original_path=".build/app_flavor-$flavor/outputs/apk/release/$flavor-release-unsigned-unzipaligned-unsigned.apk"
-            output_path=".build/$flavor-release-unzipaligned-unsigned.apk"
-            mv "$original_path" "$output_path"
-          done
+          original_path="${{ env.MAIN_REPO_DIR }}/.build/app_flavor-$flavor/outputs/apk/release/$flavor-release-unsigned-unzipaligned-unsigned.apk"
+          output_path="${{ env.MAIN_REPO_DIR }}/$flavor-release-unzipaligned-unsigned.apk"
+          cp "$original_path" "$output_path"
 
       - name: show moved apk files
         # working-directory: ${{ env.MAIN_REPO_DIR }}
         run: |
-          echo "ls -al ${{ env.MAIN_REPO_DIR }}/:"
-          ls -al ${{ env.MAIN_REPO_DIR }}/
-          echo "ls -al ${{ env.MAIN_REPO_DIR }}/.build/:"
-          ls -al ${{ env.MAIN_REPO_DIR }}/.build/
+          echo "ls -a ${{ env.MAIN_REPO_DIR }}/:"
+          ls -a ${{ env.MAIN_REPO_DIR }}/
+          echo "ls -a ${{ env.MAIN_REPO_DIR }}/.build/:"
+          ls -a ${{ env.MAIN_REPO_DIR }}/.build/
 
       # 第九步：上传APK
       - name: Upload  APK
@@ -146,7 +139,7 @@ jobs:
         with:
           name: AIDE-release-${{ matrix.flavor }}.apk
           path: |
-            ${{ env.MAIN_REPO_DIR }}/.build/*.apk
+            ${{ env.MAIN_REPO_DIR }}/*.apk
 
       # 第十步：发布到GitHub Release
       - name: Publish Release
@@ -157,5 +150,5 @@ jobs:
           body_path: ${{ env.MAIN_REPO_DIR }}/changelog/${{ env.TAG_VERSION_NAME }}/README.md
           # tag_name: ${{ env.TAG_VERSION_NAME }}
           tag_name: ${{ github.ref_name }}
-          files: ${{ env.MAIN_REPO_DIR }}/.build/*.apk
+          files: ${{ env.MAIN_REPO_DIR }}/*.apk
           token: ${{ secrets.GITHUB_TOKEN }}
