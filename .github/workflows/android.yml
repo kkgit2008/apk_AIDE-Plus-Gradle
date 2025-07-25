@@ -6,8 +6,8 @@ on:
       - v*
     branches:
       - '**'
-#    branches: [ "dev" ]
-#  pull_request:    branches: [ "dev" ]
+#  pull_request:
+    # branches: [ "master" ]
   workflow_dispatch: { }
 
 env:
@@ -145,3 +145,5 @@ jobs:
           tag_name: ${{ github.ref_name }}
           files: ${{ env.MAIN_REPO_DIR }}/${{ matrix.flavor }}-release-unzipaligned-unsigned.apk
           token: ${{ secrets.GITHUB_TOKEN }}
+
+          
