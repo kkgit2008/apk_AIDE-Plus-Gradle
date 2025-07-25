@@ -60,34 +60,34 @@ jobs:
       # 第三步：验证分支和目录结构
       - name: Verify Branches & Structure
         run: |
-          echo "验证主仓库分支..."
-          echo "current dir:"
+          echo ">>验证主仓库分支..."
+          echo ">>current dir:"
           ls -a
           cd ${{ env.MAIN_REPO_DIR }}
-          echo "cd mainDIR:"
+          echo ">>cd mainDIR:"
           ls -a
           CURRENT_MAIN_BRANCH=$(git branch --show-current)
           if [ "$CURRENT_MAIN_BRANCH" != "$MAIN_REPO_BRANCH" ]; then
-            echo "错误：主仓库分支不匹配！预期: $MAIN_REPO_BRANCH，实际: $CURRENT_MAIN_BRANCH"
+            echo ">>错误：主仓库分支不匹配！预期: $MAIN_REPO_BRANCH，实际: $CURRENT_MAIN_BRANCH"
             exit 1
           fi
           
-          echo "验证依赖仓库分支..."
-          echo "current dir:"
+          echo ">>验证依赖仓库分支..."
+          echo ">>current dir:"
           ls -a
           cd ..
-          echo "cd .. & current dir:"
+          echo ">>cd .. & current dir:"
           ls -a
           cd ${{ env.SUBMODULE_DIR }}
-          echo "cd subDIR:"
+          echo ">>cd subDIR:"
           ls -a
           CURRENT_DEP_BRANCH=$(git branch --show-current)
           if [ "$CURRENT_DEP_BRANCH" != "$DEPENDENCY_REPO_BRANCH" ]; then
-            echo "错误：依赖仓库分支不匹配！预期: $DEPENDENCY_REPO_BRANCH，实际: $CURRENT_DEP_BRANCH"
+            echo ">>错误：依赖仓库分支不匹配！预期: $DEPENDENCY_REPO_BRANCH，实际: $CURRENT_DEP_BRANCH"
             exit 1
           fi
           
-          echo "目录结构验证通过"
+          echo ">>目录结构验证通过"
           ls -a ${{ env.MAIN_REPO_DIR }}
           ls -a ${{ env.SUBMODULE_DIR }}
 
@@ -115,8 +115,8 @@ jobs:
         id: get_version_info
         run: |
           TAG_VERSION_NAME=$(grep "val TAG_VERSION_NAME =" build.gradle.kts | awk '{print $4}' | tr -d '"')
-          echo "TAG_VERSION_NAME=${TAG_VERSION_NAME}" >> $GITHUB_ENV
-          echo "当前版本: ${TAG_VERSION_NAME}"
+          echo ">>TAG_VERSION_NAME=${TAG_VERSION_NAME}" >> $GITHUB_ENV
+          echo ">>当前版本: ${TAG_VERSION_NAME}"
 
       # 第八步：复制APK文件
       - name: Rename APK for ${{ matrix.flavor }}
