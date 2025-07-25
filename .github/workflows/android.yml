@@ -31,8 +31,7 @@ jobs:
     strategy:
       # 矩阵功能，为每个包构建
       matrix:
-        # flavor: [ default, termux ]
-        flavor: [ default ]
+        flavor: [ default, termux ]
 
     steps:
       # 清理已有的MAIN_REPO_DIR，防止冲突
@@ -61,11 +60,7 @@ jobs:
       - name: Verify Branches & Structure
         run: |
           echo ">>验证主仓库分支..."
-          echo ">>current dir:"
-          ls -a
           cd ${{ env.MAIN_REPO_DIR }}
-          echo ">>cd mainDIR:"
-          ls -a
           CURRENT_MAIN_BRANCH=$(git branch --show-current)
           if [ "$CURRENT_MAIN_BRANCH" != "$MAIN_REPO_BRANCH" ]; then
             echo ">>错误：主仓库分支不匹配！预期: $MAIN_REPO_BRANCH，实际: $CURRENT_MAIN_BRANCH"
@@ -73,14 +68,8 @@ jobs:
           fi
           
           echo ">>验证依赖仓库分支..."
-          echo ">>current dir:"
-          ls -a
           cd ..
-          echo ">>cd .. & current dir:"
-          ls -a
           cd ${{ env.SUBMODULE_DIR }}
-          echo ">>cd subDIR:"
-          ls -a
           CURRENT_DEP_BRANCH=$(git branch --show-current)
           if [ "$CURRENT_DEP_BRANCH" != "$DEPENDENCY_REPO_BRANCH" ]; then
             echo ">>错误：依赖仓库分支不匹配！预期: $DEPENDENCY_REPO_BRANCH，实际: $CURRENT_DEP_BRANCH"
@@ -88,8 +77,6 @@ jobs:
           fi
           
           echo ">>目录结构验证通过"
-          # ls -a ${{ env.MAIN_REPO_DIR }}
-          # ls -a ${{ env.SUBMODULE_DIR }}
 
       # 第四步：设置JDK环境
       - name: set up JDK 21
@@ -119,27 +106,32 @@ jobs:
           echo ">>当前版本: ${TAG_VERSION_NAME}"
 
       # 第八步：复制APK文件
+      - name: show apk files
+        working-directory: ${{ env.MAIN_REPO_DIR }}
+        run: |
+          find . -name '*.apk' -print0 | while IFS= read -r -d '' apk; do
+            echo ">>ls -al apks:"
+            ls -al "$apk"
+            # sha256sum "$apk" > "${apk}.sha256"
+          done
+
       - name: Rename APK for ${{ matrix.flavor }}
         working-directory: ${{ env.MAIN_REPO_DIR }}
         run: |
           mkdir -p build/outputs/
           for flavor in ${{ join(matrix.flavor, ' ') }}; do
-            original_path="build/app_flavor-$flavor/outputs/apk/$flavor/release/app-$flavor-release.apk"
-            output_path="build/outputs/AIDE-$flavor-v${TAG_VERSION_NAME}.apk"
+            original_path=".build/app_flavor-$flavor/outputs/apk/release/$flavor-release-unsigned-unzipaligned-unsigned.apk"
+            output_path=".build/outputs/$flavor-release-unzipaligned-unsigned.apk"
             mv "$original_path" "$output_path"
           done
-#    - name: Rename APK for ${{ matrix.flavor }}
-#      run: |
-#        original_path="build/app_flavor-${{ matrix.flavor }}/outputs/apk/${{ matrix.flavor }}/release/app-${{ matrix.flavor }}-release.apk"
-#        output_path="build/app/outputs/apk/${{ matrix.flavor }}/release/AIDE-${{ matrix.flavor }}.apk"
-#        mv "$original_path" "$output_path"
 
       # 第九步：上传APK
       - name: Upload  APK
         uses: actions/upload-artifact@v4
         with:
           name: AIDE-${{ matrix.flavor }}.apk
-          path: ${{ env.MAIN_REPO_DIR }}/build/outputs/*.apk
+          path: .build/outputs/*.apk
+          # path: ${{ env.MAIN_REPO_DIR }}/.build/outputs/*.apk
           # path: build/app/outputs/apk/${{ matrix.flavor }}/release/AIDE-${{ matrix.flavor }}.apk
 
       # 第十步：发布到GitHub Release
@@ -151,5 +143,5 @@ jobs:
           body_path: ${{ env.MAIN_REPO_DIR }}/changelog/${{ env.TAG_VERSION_NAME }}/README.md
           # tag_name: ${{ env.TAG_VERSION_NAME }}
           tag_name: ${{ github.ref_name }}
-          files: ${{ env.MAIN_REPO_DIR }}/build/outputs/*.apk
+          files: ${{ env.MAIN_REPO_DIR }}/.build/outputs/*.apk
           token: ${{ secrets.GITHUB_TOKEN }}
