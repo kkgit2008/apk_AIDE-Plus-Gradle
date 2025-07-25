@@ -31,8 +31,7 @@ jobs:
     strategy:
       # 矩阵功能，为每个包构建
       matrix:
-        # flavor: [ default, termux ]
-        flavor: [ default ]
+        flavor: [ default, termux ]
 
     steps:
       - name: Cancel previous runs
