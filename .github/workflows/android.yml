@@ -43,7 +43,7 @@ jobs:
       # 清理已有的MAIN_REPO_DIR，防止冲突
       - name: Clean workspace
         run: |
-          rm -rf ${{ env.MAIN_REPO_DIR }}
+          rm -rf ${{ env.MAIN_REPO_DIR }}/*
 
       # 第一步：检出主仓库 (username/repo@branch)
       - name: Checkout Main Repository
