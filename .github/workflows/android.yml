@@ -95,17 +95,17 @@ jobs:
 
       # 第五步：准备构建环境
       - name: Grant execute permission for gradlew
-        working-directory: ${{ env.MAIN_REPO_DIR }}
+        # working-directory: ${{ env.MAIN_REPO_DIR }}
         run: chmod +x gradlew
 
       # 第六步：构建APK
       - name: Build APK for ${{ matrix.flavor }}
-        working-directory: ${{ env.MAIN_REPO_DIR }}
+        # working-directory: ${{ env.MAIN_REPO_DIR }}
         run: ./gradlew app_flavor:${{ matrix.flavor }}:assembleRelease
 
       # 第七步：获取版本信息
-      - name: Get TAG_VERSION_NAME
-        working-directory: ${{ env.MAIN_REPO_DIR }}
+      - name: Get release TAG_VERSION_NAME
+        # working-directory: ${{ env.MAIN_REPO_DIR }}
         id: get_version_info
         run: |
           TAG_VERSION_NAME=$(grep "val TAG_VERSION_NAME =" build.gradle.kts | awk '{print $4}' | tr -d '"')
@@ -113,16 +113,10 @@ jobs:
           echo ">>当前版本: ${TAG_VERSION_NAME}"
 
       # 第八步：复制APK文件
-      - name: show apk files
-        working-directory: ${{ env.MAIN_REPO_DIR }}
-        run: |
-          echo ">>ls -a apks:"
-          ls -a *.apk
-
       - name: Copy ${{ matrix.build_type }} APK
         run: |
-          original_path="${{ env.MAIN_REPO_DIR }}/.build/app_flavor-$flavor/outputs/apk/release/$flavor-release-unsigned-unzipaligned-unsigned.apk"
-          output_path="${{ env.MAIN_REPO_DIR }}/$flavor-release-unzipaligned-unsigned.apk"
+          original_path="${{ env.MAIN_REPO_DIR }}/.build/app_flavor-$flavor/outputs/apk/release/$flavor-release-*.apk"
+          output_path="${{ env.MAIN_REPO_DIR }}/"
           cp "$original_path" "$output_path"
 
       - name: show moved apk files
@@ -130,8 +124,6 @@ jobs:
         run: |
           echo "ls -a ${{ env.MAIN_REPO_DIR }}/:"
           ls -a ${{ env.MAIN_REPO_DIR }}/
-          echo "ls -a ${{ env.MAIN_REPO_DIR }}/.build/:"
-          ls -a ${{ env.MAIN_REPO_DIR }}/.build/
 
       # 第九步：上传APK
       - name: Upload  APK
