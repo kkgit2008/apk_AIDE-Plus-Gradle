@@ -129,8 +129,8 @@ jobs:
       - name: show moved apk files
         working-directory: ${{ env.MAIN_REPO_DIR }}
         run: |
-          ls -al *.apk
-          # sha256sum "$apk" > "${apk}.sha256"
+          ls -al .build/
+          # ls -al .build/*.apk
 
       # 第九步：上传APK
       - name: Upload  APK
